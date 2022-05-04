@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+
+<body>
+  <h3>Forking</h3>
+  #include stdio.h
+  #include unistd.h
+  int main()
+  {
+  int pid;
+  pid = fork();
+  if(pid==0)
+  {
+  printf("After Fork \n");
+  printf("The new child process id created by fork system call %d\n ",getpid());
+  } else
+  {
+  printf(" Before Fork \n");
+  printf("The parent process id is :%d\n",getppid());
+  printf("The parent process executed successfully\n");
+  }
+  return 0;
+  }
+  <br>
+  #include stdio.h
+  #include stdlib.h
+  #include sys/wait.h
+  #include unistd.h
+  int main()
+  {
+  pid_t cpid;
+  if (fork()== 0)
+  exit(0); /* terminate child */
+  else
+  cpid = wait(NULL); /* reaping parent */
+  printf(" Parent pid : %d\n", getpid());
+  printf(" Child pid : %d\n", cpid);
+  return 0;
+  }
+
+  <br>
+  <h3>Round Robin</h3>
+  #includestdio.h
+  int main()
+  {
+  int count,j,n,time,remain,flag=0,time_quantum;
+  int wait_time=0,turnaround_time=0,at[10],bt[10],rt[10];
+  printf("Enter Total Process:\t ");
+  scanf("%d",&n);
+  remain=n;
+  for(count=0;count(less than)n;count++) { printf("Enter Arrival Time and Burst Time for Process Process Number %d :",count+1); scanf("%d",&at[count]); scanf("%d",&bt[count]); rt[count]=bt[count]; } printf("Enter Time Quantum:\t"); scanf("%d",&time_quantum);
+    printf("\n\nProcess\t|Turnaround Time|Waiting Time\n\n"); for(time=0,count=0;remain!=0;) { if(rt[count](less than)=time_quantum && rt[count](greater than)0)
+    {
+    time+=rt[count];
+    rt[count]=0;
+    flag=1;
+    }
+    else if(rt[count](greater than)0)
+    {
+    rt[count]-=time_quantum;
+    time+=time_quantum;
+    }
+    if(rt[count]==0 && flag==1)
+    {
+    remain--;
+    printf("P[%d]\t|\t%d\t|\t%d\n",count+1,time-at[count],timeat[count]-bt[count]);
+    wait_time+=time-at[count]-bt[count];
+    turnaround_time+=time-at[count];
+    flag=0;
+    }
+    if(count==n-1)
+    count=0;
+    else if(at[count+1](less than)=time) count++; else count=0; } printf("\nAverage Waiting Time=%f\n",wait_time*1.0/n); printf("Avg Turnaround Time=%f",turnaround_time*1.0/n); return 0; } <h3>non preemti</h3>
+      #include stdio.h
+      int main()
+      {
+      int burst_time[20], process[20], waiting_time[20],
+      turnaround_time[20], priority[20];
+      int i, j, limit, sum = 0, position, temp;
+      float average_wait_time, average_turnaround_time;
+      printf("Enter Total Number of Processes:\t");
+      scanf("%d", &limit);
+      printf("\nEnter Burst Time and Priority For %d Processes\n", limit);
+      for(i = 0; i (less than) limit; i++) { printf("\nProcess[%d]\n", i + 1); printf("Process Burst Time:\t"); scanf("%d", &burst_time[i]); printf("Process Priority:\t"); scanf("%d", &priority[i]); process[i]=i + 1; } for(i=0; i (less than) limit; i++) { position=i;
+        for(j=i + 1; j (less than) limit; j++) { if(priority[j] (less than) priority[position]) { position=j; } } temp=priority[i]; priority[i]=priority[position]; priority[position]=temp; temp=burst_time[i]; burst_time[i]=burst_time[position];
+        burst_time[position]=temp; temp=process[i]; process[i]=process[position]; process[position]=temp; } waiting_time[0]=0; for(i=1; i (less than) limit; i++) { waiting_time[i]=0; for(j=0; j (less than) i; j++) { waiting_time[i]=waiting_time[i] + burst_time[j]; }
+        sum=sum + waiting_time[i]; } average_wait_time=sum / limit; sum=0; printf("\nProcess ID\t\tBurst Time\t Waiting Time\t Turnaround Time\n"); for(i=0; i (less than) limit; i++) { turnaround_time[i]=burst_time[i] + waiting_time[i]; sum=sum +
+        turnaround_time[i]; printf("\nProcess[%d]\t\t%d\t\t %d\t\t %d\n", process[i], burst_time[i], waiting_time[i], turnaround_time[i]); } average_turnaround_time=sum / limit; printf("\nAverage Waiting Time:\t%f", average_wait_time);
+        printf("\nAverage Turnaround Time:\t%f\n", average_turnaround_time); return 0; } <h3>consumer produ</h3>
+
+        #include stdio.h
+        #include stdlib.h
+        int mutex=1,full=0,empty=3,x=0;
+        int main()
+        {
+        int n;
+        void producer();
+        void consumer();
+        int wait(int);
+        int signal(int);
+        printf("\n1.Producer\n2.Consumer\n3.Exit");
+        while(1)
+        {
+        printf("\nEnter your choice:");
+        scanf("%d",&n);
+        switch(n)
+        {
+        case 1: if((mutex==1)&&(empty!=0))
+        producer();
+        else
+        printf("Buffer is full!!");
+        break;
+        case 2: if((mutex==1)&&(full!=0))
+        consumer();
+        else
+        printf("Buffer is empty!!");
+        break;
+        case 3:
+        exit(0);
+        break;
+        }
+        }
+        return 0;
+        }
+        int wait(int s)
+        {
+        return (--s);
+        }
+        int signal(int s)
+        {
+        return(++s);
+        }
+        void producer()
+        {
+        mutex=wait(mutex);
+        full=signal(full);
+        empty=wait(empty);
+        x++;
+        printf("\nProducer produces the item %d",x);
+        mutex=signal(mutex);
+        }
+        void consumer()
+        {
+        mutex=wait(mutex);
+        full=wait(full);
+        empty=signal(empty);
+        printf("\nConsumer consumes item %d",x);
+        x--;
+        mutex=signal(mutex);
+        }
+
+        <h3>banker</h3>
+
+        #include stdio.h
+        int main()
+        {
+        int p,res;
+        printf("\n--------------------------------------------------------------\n");
+        printf("\n \t\t\t\t\tBanker's Algorithm \n");
+        printf("\n--------------------------------------------------------------\n");
+        printf("\n Enter the Number of Process : ");
+        scanf("%d",&p);
+        printf("\n Enter the Number of Resources : ");
+        scanf("%d",&res);
+        printf("\n---------------------------------------------------------------\n");
+        int
+        allocated[p][res],need[p][res],max[p][res],status[p],seq[p],available[1][res],flag=0
+        ; printf("\n Enter the Allocated Matrix : \n");
+        for(int i=0;i(less than)p;i++) { for(int j=0;j(less than)res;j++) { scanf("%d",&allocated[i][j]); } } printf("\n----------------------------------------------------------------\n"); printf("\n Enter the Max Matrix : \n"); for(int i=0;i(less than)p;i++) { for(int
+          j=0;j(less than)res;j++) { scanf("%d",&max[i][j]); } } printf("\n--------------------------------------------------------------------\n"); for(int i=0;i(less than)p;i++) { for(int j=0;j(less than)res;j++) { need[i][j]=max[i][j]-allocated[i][j]; } } printf("\n Enter the
+          Available Resources : ");
+for(int i=0;i(less than)res;i++)
+{
+scanf(" %d",&available[0][i]); } printf("\n-------------------------------------------------------------------\n"); printf("\n Process\t Allocation\t\tMax\t\t Need\t\t Available\t"); for(int i=0;i(less than)p;i++) { printf("\n P%d\t\t ",i);
+for(int j=0;j(less than)res;j++)
+{
+printf(" %d ",allocated[i][j]);
+}
+printf(" \t\t"); for(int j=0;j(less than)res;j++) { printf("%d ",max[i][j]);
+}
+printf(" \t\t"); for(int j=0;j(less than)res;j++) { printf(" %d",max[i][j]-allocated[i][j]); } printf("\t\t"); for(int j=0;j(less than)res;j++) printf(" %d ",available[0][j]);
+}
+printf(" \n\n----------------------------------------------------------------\n"); for(int i=0;i(less than)p;i++) { status[i]=0; } int counter=0; while(counter(less than)p) { int st=0; int processid=9999; for(int i=0;i(less than)p;i++) { for(int j=0;j(less than)res;j++) {
+          if(available[0][j](greater than)=need[i][j] && status[i]==0)
+          {
+          st=1;
+          processid=i;
+          }
+          else
+          {
+          st=0;
+          break;
+          }
+          }
+          if(st==1)
+          {
+          break;
+          }
+          else{
+          continue;
+          }
+          }
+          if(processid==9999){
+          printf(" The Processess are in Deadlock ");
+          printf("\n------------------------------------------------------\n");
+          flag=1;
+          break;
+          }
+          seq[counter]=processid;//storing safe
+          sequence status[processid]=1;
+          counter++;
+          for(int j=0;j(less than)res;j++) { available[0][j]=available[0][j]+allocated[processid][j] ; } } if(flag==0) { printf("\n The Processes are in a Safe State"); printf("\n\n The Safe Execution Sequence : ");
+for(int i=0;i(less than)p;i++)
+{
+printf(" P%d -- ",seq[i]);
+            }
+            printf("\n\n---------------------------------------------------\n");
+            }
+            return 0;
+            }
+
+            <h3>best fit</h3>
+
+            #include stdio.h
+            int main()
+            {
+            int fragment[20],b[20],p[20],i,j,nb,np,temp,lowest=9999;
+            int barray[20],parray[20];
+            printf("\n.............................................\n");
+            printf("\n\t\t\t\tMemory Management Scheme - Best fit\n");
+            printf("\n.............................................\n");
+            printf("\n Enter the number of blocks :");
+            scanf("%d",&nb);
+            printf("\n.............................................\n");
+            printf("\n Enter the number of processes :");
+            scanf("%d",&np);
+            printf("\n.............................................\n");
+            printf("\n Enter the size of the blocks: \n");
+            for(i=1; i(less than)=nb;i++) { printf("block no. %d :",i); scanf("%d",&b[i]); } printf("\n.............................................\n"); printf("\n Enter the size of the processes :\n"); for(i=1;i(less than)=np;i++) { printf("process no. %d :",i);
+              scanf("%d",&p[i]); } printf("\n.............................................\n"); for(i=1;i(less than)=np;i++) { for(j=1;j(less than)=nb;j++) { if (barray[j]!=1) { temp=b[j]-p[i]; if(temp(greater than)=0)
+              if(lowest(greater than)temp)
+              {
+              parray[i]=j;
+              lowest=temp;
+              }
+              }
+              }
+              fragment[i]=lowest;
+              barray[parray[i]]=1;
+              lowest=10000;
+              }
+              printf("\n Process_no\tProcess_size\tBlock_no\tBlock_size\tFragment\n");
+              for(i=1;i(less than)=np&&parray[i]!=0;i++) printf("\n %d\t\t%d\t\t%d\t\t%d\t\t%d\n\n",i,p[i],parray[i],b[parray[i]],fragment[i]); printf("\n...................................................\n"); return 0; } <h3>first fit</h3>
+                #include stdio.h
+                int main()
+                {
+                int block_arr[10], file_arr[10];
+                int fragments[10], blocks[10], files[10];
+                int m, n, number_of_blocks, number_of_files, temp;
+                printf("\n.....................................................\n");
+                printf("\n \t\t\t\tMemory Management Scheme - First-Fit\n");
+                printf("\n.....................................................\n");
+                printf("\n Enter the Total Number of Blocks : ");
+                scanf("%d", &number_of_blocks);
+                printf("\n.....................................................\n");
+                printf("\n Enter the Total Number of Process : ");
+                scanf("%d", &number_of_files);
+                printf("\n.....................................................\n");
+                printf("\n Enter the Size of the Blocks : \n");
+                for(m = 0; m (less than) number_of_blocks; m++) { printf(" Block No. [%d] : ", m + 1);
+scanf(" %d", &blocks[m]); } printf("\n......................................................\n"); printf("\n Enter the Size of the Process : \n"); for(m=0; m (less than) number_of_files; m++) { printf(" Process No. [%d] : ", m + 1);
+scanf(" %d", &files[m]); } printf("\n......................................................\n"); for(m=0; m (less than) number_of_files; m++) { for(n=0; n (less than) number_of_blocks; n++) { if(block_arr[n] !=1) { temp=blocks[n] - files[m]; if(temp(greater than)= 0)
+                  {
+                  file_arr[m] = n;
+                  break;
+                  }
+                  }
+                  }
+                  fragments[m] = temp;
+                  block_arr[file_arr[m]] = 1;
+                  }
+                  printf("\n Process_no.\tProcess Size\tBlock Number\tBlock
+                  Size\tFragment\n");
+                  for(m = 0; m (less than) number_of_files; m++) { printf("\n %d\t\t%d\t\t%d\t\t%d\t\t%d\n\n", m+1, files[m], file_arr[m]+1,blocks[file_arr[m]],fragments[m]); } printf("\n.....................................................\n"); return 0; }
+                    <h3>worst fit</h3>
+
+                    #include stdio.h
+                    int main()
+                    {
+                    int fragments[10], blocks[10], files[10];
+                    int m, n, number_of_blocks, number_of_files, temp, top = 0;
+                    static int block_arr[10], file_arr[10];
+                    printf("\n..................................\n");
+                    printf("\n \t\t\t\tMemory Management Scheme - Worst-Fit\n");
+                    printf("\n...................................\n");
+                    printf("\n Enter the Total Number of Blocks : ");
+                    scanf("%d",&number_of_blocks);
+                    printf("\n..................................\n");
+                    printf("\n Enter the Total Number of Process : ");
+                    scanf("%d",&number_of_files);
+                    printf("\n...................................\n");
+                    printf("\n Enter the Size of the Blocks : \n");
+                    for(m = 0; m (less than) number_of_blocks; m++) { printf(" Block No. [%d] : ", m + 1);
+scanf(" %d", &blocks[m]); } printf("\n..................................\n"); printf("\n Enter the Size of the Process : \n"); for(m=0; m (less than) number_of_files; m++) { printf(" Process No. [%d] : ", m + 1);
+scanf(" %d", &files[m]); } printf("\n..................................\n"); for(m=0; m (less than) number_of_files; m++) { for(n=0; n (less than) number_of_blocks; n++) { if(block_arr[n] !=1) { temp=blocks[n] - files[m]; if(temp(greater than)= 0)
+                      {
+                      if(top (less than) temp) { file_arr[m]=n; top=temp; } } } fragments[m]=top; block_arr[file_arr[m]]=1; } top=0; } printf("\n Process_no.\tProcess Size\tBlock Number\tBlock Size\tFragment\n"); for(m=0; m (less than) number_of_files; m++) { printf("\n
+                        %d\t\t%d\t\t%d\t\t%d\t\t%d\n\n", m+1, files[m], file_arr[m]+1,blocks[file_arr[m]],fragments[m]); } printf("\n............................\n"); return 0; } <h3>fifo</h3>
+
+                        #include stdio.h
+                        int main()
+                        {
+                        int reference_string[30], page_faults = 0, m, n, s, pages, frames,page_hits;
+                        printf("\n
+                        --\n");
+                        printf("\n Enter Total Number of Pages : ");
+                        scanf("%d", &pages);
+                        printf("\n
+                        --\n");
+                        printf("\n Enter the Values of the Reference String : \n");
+                        for(m = 0; m (less than) pages; m++) { printf(" Value No. [%d] : ", m + 1);
+scanf(" %d", &reference_string[m]); } printf("\n --\n"); printf("\n Enter Total Number of Frames : ");
+{
+scanf(" %d", &frames); } int temp[frames]; for(m=0; m (less than) frames; m++) { temp[m]=-1; } for(m=0; m (less than) pages; m++) { s=0; for(n=0; n (less than) frames; n++) { if(reference_string[m]==temp[n]) { s++; page_faults--; } } page_faults++; if((page_faults (less than)=frames) &&
+                          (s==0)) { temp[m]=reference_string[m]; } else if(s==0) { temp[(page_faults - 1) % frames]=reference_string[m]; } printf("\n"); for(n=0; n (less than) frames; n++) { printf("%d\t", temp[n]); } } page_hits=pages - page_faults;
+                          printf("\n --\n"); printf("\n Total Page Hits : %d\n", page_hits); printf("\n Total Page Miss : %d\n", page_faults); printf("\n Page Hit Ratio : %f\n", (double)page_hits/pages); printf("\n Page Miss Ratio : %f\n",(double)
+                          page_faults/pages); printf("\n --\n"); return 0; } <h3>lru</h3>
+
+                          #include stdio.h
+                          int find LRU(int time[], int n){
+                          int i, minimum = time[0], pos = 0;
+                          for(i = 1; i (less than) n; ++i){ if(time[i] (less than) minimum){ minimum=time[i]; pos=i; } } return pos; } int main() { int no_of_frames, no_of_pages, page_hits,frames[10], pages[30], counter=0, time[10], flag1, flag2, i, j, pos, faults=0;
+                            printf("\n ----\n"); printf("\n Enter the number of pages : ");
+scanf(" %d", &no_of_pages); printf("\n ----\n"); printf("\n Enter the Values of the Reference String : \n"); for(i=0; i (less than) no_of_pages; ++i) { printf(" Value No. [%d] : ", i+ 1);
+scanf(" %d", &pages[i]); } printf("\n \n"); printf("\n Enter the number of frames : ");
+scanf(" %d", &no_of_frames); printf("\n ----\n"); for(i=0; i (less than) no_of_frames; ++i){ frames[i]=-1; } for(i=0; i (less than) no_of_pages; ++i){ flag1=flag2=0; for(j=0; j (less than) no_of_frames; ++j){ if(frames[j]==pages[i]){ counter++; time[j]=counter; flag1=flag2=1;
+                            break; } if(flag1==0){ } for(j=0; j (less than) no_of_frames; ++j){ if(frames[j]==-1){ counter++; faults++; frames[j]=pages[i]; time[j]=counter; flag2=1; break; } } } if(flag2==0){ pos=find LRU(time, no_of_frames);counter++;
+                            faults++; frames[pos]=pages[i]; time[pos]=counter; } printf("\n"); for(j=0; j (less than) no_of_frames; ++j){ printf(" %d\t", frames[j]); } } page_hits=no_of_pages - faults; printf("\n \n"); printf("\n Total Page Hits : %d\n",
+                            page_hits); printf("\n Total Page Miss : %d\n", faults); printf("\n Page Hit Ratio : %f\n", (double)page_hits/no_of_pages); printf("\n Page Miss Ratio : %f\n",(double)faults/no_of_pages); printf("\n \n"); return 0; }<h3>
+                            fcfs</h3>
+
+                            #include stdio.h
+                            #include stdlib.h
+                            #include math.h
+                            int main()
+                            {
+                            int queue[20],n,head,i,j,k,seek=0,max,diff;
+                            float avg;
+                            printf("\n------------------------------------------------------------------------------------------------\n");
+                            printf("\n \t\t\t\t\tFCFS Disk Scheduling Algorithm \n");
+                            printf("\n------------------------------------------------------------------------------------------------\n");
+                            printf("\n Enter the maximum range of the disk : ");
+                            scanf("%d",&max);
+                            printf("\n------------------------------------------------------------------------------------------------\n");
+                            printf("\n Enter the number of queue requests : ");
+                            scanf("%d",&n);
+                            printf("\n------------------------------------------------------------------------------------------------\n");
+                            printf("\n Enter the queue of disk positions to be read : ");
+                            for(i=1;i(less than)=n;i++) scanf("%d",&queue[i]); printf("\n------------------------------------------------------------------------------------------------\n"); printf("\n Enter the initial head position : ");
+scanf(" %d",&head); printf("\n------------------------------------------------------------------------------------------------\n"); queue[0]=head; for(j=0;j(less than)=n-1;j++) { diff=abs(queue[j+1]-queue[j]); seek+=diff; printf("\n The Disk Head moves from
+                              %d to %d with Seek Time : %d\n",queue[j],queue[j+1],diff); } printf("\n------------------------------------------------------------------------------------------------\n"); printf("\n Total Head Movements : %d
+                              cylinders\n",seek); avg=seek/(float)n; printf("\n\n Average Head Movements :%f cylinders\n",avg); printf("\n------------------------------------------------------------------------------------------------\n"); return 0;
+                              } <h3>scan</h3>
+
+                              #include stdio.h
+                              #include stdlib.h
+                              #include math.h
+                              int absoluteValue(int); // Declaring function absoluteValue
+                              void main()
+                              {
+                              int queue[25],n,headposition,i,j,k,seek=0, maxrange,
+                              difference,temp,queue1[20],queue2[20],temp1=0,temp2=0;
+                              float averageSeekTime;
+                              printf("\n------------------------------------------------------------------------------------------------\n");
+                              printf("\n\t\t\t\t\tSCAN Disk Scheduling Algorithm \n");
+                              printf("\n------------------------------------------------------------------------------------------------\n");
+                              // Reading the maximum Range of the Disk.
+                              printf("\n Enter the maximum range of the disk : ");
+                              scanf("%d",&maxrange);
+                              printf("\n------------------------------------------------------------------------------------------------\n");
+
+                              // Reading the number of Queue Requests(Disk access requests)
+                              printf("\n Enter the number of queue requests : ");
+                              scanf("%d",&n);
+                              printf("\n------------------------------------------------------------------------------------------------\n");
+                              // Reading the initial head position.(ie. the starting point of execution)
+                              printf("\n Enter the initial head position : ");
+                              scanf("%d",&headposition);
+                              printf("\n------------------------------------------------------------------------------------------------\n");
+
+                              // Reading disk positions to be read in the order of arrival
+                              printf("\n Enter the queue of disk positions to be read : ");
+                              for(i=1;i(less than)=n;i++) // Note that i varies from 1 to n instead of 0 to n-1 { scanf("%d",&temp); //Reading position value to a temporary variable //Now if the requested position is greater than current headposition, //then
+                                pushing that to array queue1 if(temp(greater than)headposition)
+                                {
+                                queue1[temp1]=temp; //temp1 is the index variable of queue1[]
+                                temp1++; //incrementing temp1
+                                }
+                                else //else if temp (less than) current headposition,then push to array queue2[] { queue2[temp2]=temp; //temp2 is the index variable of queue2[] temp2++; } }
+                                  printf("\n------------------------------------------------------------------------------------------------\n"); //Now we have to sort the two arrays //SORTING array queue1[] in ascending order for(i=0;i(less than)temp1-1;i++)
+                                  { for(j=i+1;j(less than)temp1;j++) { if(queue1[i](greater than)queue1[j])
+                                  {
+                                  temp=queue1[i];
+                                  queue1[i]=queue1[j];
+                                  queue1[j]=temp;
+                                  }
+                                  }
+                                  }
+
+                                  //SORTING array queue2[] in descending order
+                                  for(i=0;i(less than)temp2-1;i++) { for(j=i+1;j(less than)temp2;j++) { if(queue2[i](less than)queue2[j]) { temp=queue2[i]; queue2[i]=queue2[j]; queue2[j]=temp; } } } //Copying first array queue1[] into queue[] for(i=1,j=0;j(less than)temp1;i++,j++) {
+                                    queue[i]=queue1[j]; } //Setting queue[i] to maxrange because the head goes to //end of disk and comes back in scan Algorithm queue[i]=maxrange; //Copying second array queue2[] after that first one is copied, into
+                                    queue[] for(i=temp1+2,j=0;j(less than)temp2;i++,j++) { queue[i]=queue2[j]; } //Setting queue[i] to 0. Because that is the innermost cylinder. queue[i]=0; //At this point, we have the queue[] with the requests in the
+                                    //correct order of execution as per scan algorithm. //Now we have to set 0th index of queue[] to be the initial headposition. queue[0]=headposition; // Calculating SEEK TIME. seek is initially set to 0 in the
+                                    declaration part. for(j=0; j(less than)=n; j++) //Loop starts from headposition. (ie. 0th index of queue) { // Finding the difference between next position and current position. difference=abs(queue[j+1]-queue[j]); // Adding
+                                    difference to the current seek time value seek=seek + difference; // Displaying a message to show the movement of disk head printf("\n Disk head moves from position %d to %d with Seek Time : %d \n", queue[j],
+                                    queue[j+1], difference); } // Calculating Average Seek time averageSeekTime=seek/(float)n; //Display Total and Average Seek Time(s)
+                                    printf("\n------------------------------------------------------------------------------------------------\n"); printf("\n Total Head Movements : %d cylinders\n",seek); printf("\n\n Average Head Movements :%f
+                                    cylinders\n",averageSeekTime); printf("\n------------------------------------------------------------------------------------------------\n"); } <br>
+
+                                    <h3>Cscan</h3>
+
+                                    #include stdio.h
+                                    #include stdlib.h
+                                    #include math.h
+                                    int main()
+                                    {
+                                    int queue[20],n,head,i,j,k,seek=0,max,diff,temp,queue1[20],queue2[20],
+                                    temp1=0,temp2=0;
+                                    float avg;
+                                    printf("\n------------------------------------------------------------------------------------------------\n");
+                                    printf("\n\t\t\t\t\tC-SCAN Disk Scheduling Algorithm \n");
+                                    printf("\n------------------------------------------------------------------------------------------------\n");
+                                    printf("\n Enter the maximum range of the disk : ");
+                                    scanf("%d",&max);
+                                    printf("\n------------------------------------------------------------------------------------------------\n");
+                                    printf("\n Enter the number of queue requests : ");
+                                    scanf("%d",&n);
+                                    printf("\n------------------------------------------------------------------------------------------------\n");
+                                    printf("\n Enter the initial head position : ");
+                                    scanf("%d",&head);
+                                    printf("\n------------------------------------------------------------------------------------------------\n");
+                                    printf("\n Enter the queue of disk positions to be read : ");
+                                    for(i=1;i(less than)=n;i++) { scanf("%d",&temp); if(temp(greater than)=head)
+                                      {
+                                      queue1[temp1]=temp;
+                                      temp1++;
+                                      }
+                                      else
+                                      {
+                                      queue2[temp2]=temp;
+                                      temp2++;
+                                      }
+                                      }
+                                      printf("\n------------------------------------------------------------------------------------------------\n");
+                                      for(i=0;i(less than)temp1-1;i++) { for(j=i+1;j(less than)temp1;j++) { if(queue1[i](greater than)queue1[j])
+                                        {
+                                        temp=queue1[i];
+                                        queue1[i]=queue1[j];
+                                        queue1[j]=temp;
+                                        }
+                                        }
+                                        }
+                                        for(i=0;i(less than)temp2-1;i++) { for(j=i+1;j(less than)temp2;j++) { if(queue2[i](greater than)queue2[j])
+                                          {
+                                          temp=queue2[i];
+                                          queue2[i]=queue2[j];
+                                          queue2[j]=temp;
+                                          }
+                                          }
+                                          }
+                                          for(i=1,j=0;j(less than)temp1;i++,j++) queue[i]=queue1[j]; queue[i]=max; queue[i+1]=0; for(i=temp1+3,j=0;j(less than)temp2;i++,j++) queue[i]=queue2[j]; queue[0]=head; for(j=0;j(less than)=n+1;j++) { diff=abs(queue[j+1]-queue[j]);
+                                            seek+=diff; printf("\n The Disk Head moves from %d to %d with Seek Time : %d\n",queue[j],queue[j+1],diff); }
+                                            printf("\n------------------------------------------------------------------------------------------------\n"); printf("\n Total Head Movements : %d cylinders\n",seek); avg=seek/(float)n; printf("\n\n
+                                            Average Head Movements :%f cylinders\n",avg); printf("\n------------------------------------------------------------------------------------------------\n"); return 0; } </body>
+
+</html>
